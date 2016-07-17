@@ -15,12 +15,14 @@ end
 
 
 defimpl Producer, for: DummyProducer do
+  require Logger
+
   def send_text(_, %{user: chat}, %{text: msg}) do
-    IO.puts " - sending `#{msg}` to user in private: `#{inspect chat}`"
+    Logger.info "Sending `#{msg}` to user in private: `#{inspect chat}`"
   end
 
   def send_text(_, %{chat: chat}, %{text: msg}) do
-    IO.puts " - sending `#{msg}` to chat: `#{inspect chat}`"
+    Logger.info "Sending `#{msg}` to chat: `#{inspect chat}`"
   end
 
   defdelegate send_photo(producer, chat, msg), to: Producer.Shared

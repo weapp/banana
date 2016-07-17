@@ -3,16 +3,17 @@ defmodule Banana do
     import Supervisor.Spec
 
     pool_options = [
-      name: {:local, :my_pool},
+      name: {:local, :bot_caller_pool},
       worker_module: BotCaller,
-      size: 5,
-      max_overflow: 10
+      size: 2,
+      max_overflow: 0,
+      strategy: :fifo
     ]
 
     children = [
-      :poolboy.child_spec(:my_pool, pool_options, []),
-      worker(DummyProducer, [{"four", 4}, 1100], id: :four),
-      worker(DummyProducer, [{"six-", 6}], id: :six),
+      :poolboy.child_spec(:bot_caller_pool, pool_options, nil),
+      worker(DummyProducer, [{"manu", 0}, 750], id: :manu),
+      worker(DummyProducer, [{"samu", 0}, 1500], id: :samu),
       worker(Broker, [[BananaBot, EchoBot]])
     ]
 

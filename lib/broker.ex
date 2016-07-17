@@ -3,14 +3,10 @@ defmodule Broker do
 
   def start_link(initial_val), do: GenServer.start_link(__MODULE__, initial_val, name: :broker)
 
-  def init(initial_val), do: {:ok, initial_val}
-
   def receive(producer, val), do: GenServer.call(:broker, {:receive, producer, val})
 
   def handle_call({:receive, producer, val}, _from, bots) do
-    BotCaller.call(:do_work)
-
-    Enum.each bots, &(Task.async(fn -> &1.receive(producer, val) end))
+    Enum.each bots, &(Task.async(fn -> BotCaller.call({:receive, &1, producer, val}) end))
     {:reply, nil, bots}
   end
 end
@@ -19,16 +15,13 @@ end
 defmodule BotCaller do
   use GenServer
 
-  # def call do
-  #   {:ok, pid} = GenServer.start_link(BotCaller, nil)
-  #   GenServer.call(pid, :do_work)
-  # end
-
   def call(action) do
+    require Logger
+    Logger.debug("BrokerCaller: queued call: #{inspect action}")
     Task.async(fn ->
-      :poolboy.transaction(:my_pool, fn(pid) ->
+      :poolboy.transaction(:bot_caller_pool, fn(pid) ->
         GenServer.call(pid, action)
-      end)
+      end, :infinity)
     end)
   end
 
@@ -36,10 +29,11 @@ defmodule BotCaller do
     GenServer.start_link(__MODULE__, initial_val, [])
   end
 
-  def handle_call(:do_work, _from, state) do
-    {d, h} = :calendar.local_time()
-    IO.puts "> #{inspect h} >>>>> process #{inspect self} doing work "
-    :timer.sleep 1000
-    {:reply, "response", state}
+  def handle_call(action = {:receive, bot, producer, val}, _from, state) do
+    require Logger
+    Logger.debug("BrokerCaller: executing call: #{inspect action}")
+
+    bot.receive(producer, val)
+    {:reply, nil, state}
   end
 end
