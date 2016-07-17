@@ -4,7 +4,3 @@ defprotocol Producer do
   def send_text(producer, chat, msg)
   def send_photo(producer, chat, msg)
 end
-
-# defprotocol ProducerText do
-#   def send_text(producer, chat, msg)
-# end

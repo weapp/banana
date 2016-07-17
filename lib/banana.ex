@@ -21,7 +21,12 @@ defmodule Banana do
 
   def color(data), do: data |> IO.ANSI.format(true) |> IO.iodata_to_binary()
 
+  def blue(str), do: color([:blue, str])
+  def cyan(str), do: color([:cyan, str])
+  def green(str), do: color([:green, str])
+  def magenta(str), do: color([:magenta, str])
+  def red(str), do: color([:red, str])
+  def underline(str), do: color([:underline, str])
   def yellow(str), do: color([:yellow, str])
 
-  def cyan(str), do: color([:cyan, str])
 end
