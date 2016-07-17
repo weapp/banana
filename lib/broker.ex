@@ -3,14 +3,13 @@ defmodule Broker do
 
   def start_link(initial_val), do: GenServer.start_link(__MODULE__, initial_val, name: :broker)
 
-  def receive(producer, val), do: GenServer.call(:broker, {:receive, producer, val})
+  def receive(producer, msg), do: GenServer.call(:broker, {:receive, producer, msg})
 
-  def handle_call({:receive, producer, val}, _from, bots) do
-    Enum.each bots, &(Task.async(fn -> BotCaller.call({:receive, &1, producer, val}) end))
+  def handle_call({:receive, producer, msg}, _from, bots) do
+    Enum.each bots, &(BotCaller.call({:receive, &1, producer, msg}))
     {:reply, nil, bots}
   end
 end
-
 
 defmodule BotCaller do
   use GenServer

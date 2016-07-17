@@ -21,17 +21,22 @@ defmodule DummyProducer do
 
   def tick({name, val}) do
     ticktock = if (rem(val, 2) == 0), do: "tick", else: "tock"
-    produce(
-      %{chat: "chat"},
-      %{user: name},
-      "#{ticktock} #{val}"
-    )
+    if val < 10 do
+      produce(
+        %{chat: "chat"},
+        %{user: name},
+        "#{ticktock} #{val}"
+      )
+    end
     {name, val + 1}
   end
 
   def produce(chat, user, msg) do
     require Logger
-    Logger.debug("DummyProducer: produce: #{inspect {chat, user, msg}}")
+    import Banana, only: [yellow: 1, cyan: 1]
+    Logger.info(
+      "DummyProducer: #{yellow "produce"}: #{cyan inspect {chat, user, msg}}"
+    )
     Broker.receive(%__MODULE__{pid: self}, {chat, user, msg})
   end
 end

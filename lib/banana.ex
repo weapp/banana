@@ -6,8 +6,7 @@ defmodule Banana do
       name: {:local, :bot_caller_pool},
       worker_module: BotCaller,
       size: 2,
-      max_overflow: 0,
-      strategy: :fifo
+      max_overflow: 0
     ]
 
     children = [
@@ -19,4 +18,10 @@ defmodule Banana do
 
     Supervisor.start_link(children, strategy: :one_for_one)
   end
+
+  def color(data), do: data |> IO.ANSI.format(true) |> IO.iodata_to_binary()
+
+  def yellow(str), do: color([:yellow, str])
+
+  def cyan(str), do: color([:cyan, str])
 end
